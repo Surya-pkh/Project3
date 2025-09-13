@@ -4,7 +4,7 @@
 set -e
 
 # Configuration - change these as needed
-DEV_REPO="surya-pkh/project3-dev"
+DEV_REPO="suryapkh/project3-dev"
 SSH_KEY="~/.ssh/your-aws-key.pem"  # Replace with your actual key filename
 SERVER_USER="ec2-user"
 SERVER_IP="YOUR_EC2_PUBLIC_IP"  # Replace with your actual AWS instance IP

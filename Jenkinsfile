@@ -19,7 +19,7 @@ pipeline {
                     echo "Current branch: ${env.GIT_BRANCH}"
                     
                     // Using only dev repository
-                    env.DOCKER_REPO = 'surya-pkh/project3-dev'
+                    env.DOCKER_REPO = 'suryapkh/project3-dev'
                     
                     echo "Using Docker repository: ${env.DOCKER_REPO}"
                 }

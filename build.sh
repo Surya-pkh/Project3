@@ -4,9 +4,8 @@
 set -e
 
 # Configuration - change these as needed
-IMAGE_NAME="surya-pkh/project3"
-DEV_REPO="surya-pkh/project3-dev"
-PROD_REPO="surya-pkh/project3-prod"
+IMAGE_NAME="suryapkh/project3"
+DEV_REPO="suryapkh/project3-dev"
 
 # Get the current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
