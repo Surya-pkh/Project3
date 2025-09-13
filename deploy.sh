@@ -5,25 +5,13 @@ set -e
 
 # Configuration - change these as needed
 DEV_REPO="surya-pkh/project3-dev"
-PROD_REPO="surya-pkh/project3-prod"
-SSH_KEY="~/.ssh/aws-key.pem"
+SSH_KEY="~/.ssh/your-aws-key.pem"  # Replace with your actual key filename
 SERVER_USER="ec2-user"
-SERVER_IP="YOUR_AWS_INSTANCE_IP"  # Replace with your AWS instance IP
+SERVER_IP="YOUR_EC2_PUBLIC_IP"  # Replace with your actual AWS instance IP
 
-# Get the current branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-# Determine which repository to pull from based on branch
-if [ "$CURRENT_BRANCH" == "dev" ]; then
-    REPO=$DEV_REPO
-    echo "Deploying from development repository..."
-elif [ "$CURRENT_BRANCH" == "master" ] || [ "$CURRENT_BRANCH" == "main" ]; then
-    REPO=$PROD_REPO
-    echo "Deploying from production repository..."
-else
-    echo "Current branch is neither dev nor master/main. Cannot determine which repository to deploy from."
-    exit 1
-fi
+# Using only the dev repository
+REPO=$DEV_REPO
+echo "Deploying from development repository..."
 
 # Generate Docker Compose file for deployment
 cat > docker-compose.deploy.yml << EOF

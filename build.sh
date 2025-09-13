@@ -15,30 +15,15 @@ TAG=$(date +%Y%m%d-%H%M%S)
 echo "Building Docker image..."
 docker build -t $IMAGE_NAME:$TAG .
 
-# Tag for appropriate repository based on branch
-if [ "$CURRENT_BRANCH" == "dev" ]; then
-    echo "Tagging image for dev repository..."
-    docker tag $IMAGE_NAME:$TAG $DEV_REPO:$TAG
-    docker tag $IMAGE_NAME:$TAG $DEV_REPO:latest
-    
-    echo "Pushing to dev repository..."
-    docker push $DEV_REPO:$TAG
-    docker push $DEV_REPO:latest
-    
-    echo "Image successfully pushed to development repository"
-elif [ "$CURRENT_BRANCH" == "master" ] || [ "$CURRENT_BRANCH" == "main" ]; then
-    echo "Tagging image for production repository..."
-    docker tag $IMAGE_NAME:$TAG $PROD_REPO:$TAG
-    docker tag $IMAGE_NAME:$TAG $PROD_REPO:latest
-    
-    echo "Pushing to production repository..."
-    docker push $PROD_REPO:$TAG
-    docker push $PROD_REPO:latest
-    
-    echo "Image successfully pushed to production repository"
-else
-    echo "Current branch is neither dev nor master/main. Not pushing to any repository."
-    exit 1
-fi
+# Tag and push to dev repository
+echo "Tagging image for dev repository..."
+docker tag $IMAGE_NAME:$TAG $DEV_REPO:$TAG
+docker tag $IMAGE_NAME:$TAG $DEV_REPO:latest
+
+echo "Pushing to dev repository..."
+docker push $DEV_REPO:$TAG
+docker push $DEV_REPO:latest
+
+echo "Image successfully pushed to development repository"
 
 echo "Build process completed successfully!"
