@@ -12,16 +12,21 @@ pipeline {
             }
         }
         
-        stage('Set Repository') {
+        stage('Determine Branch') {
             steps {
                 script {
                     env.GIT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
                     echo "Current branch: ${env.GIT_BRANCH}"
                     
-                    // Using only dev repository
-                    env.DOCKER_REPO = 'suryapkh/project3-dev'
+                    if (env.GIT_BRANCH == 'dev') {
+                        env.DOCKER_REPO = 'suryapkh/project3-dev'
+                    } else if (env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'main') {
+                        env.DOCKER_REPO = 'suryapkh/project3-prod'
+                    } else {
+                        error "Branch ${env.GIT_BRANCH} is not supported for deployment"
+                    }
                     
-                    echo "Using Docker repository: ${env.DOCKER_REPO}"
+                    echo "Selected Docker repository: ${env.DOCKER_REPO}"
                 }
             }
         }
