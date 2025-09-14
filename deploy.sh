@@ -69,13 +69,25 @@ EOF
 echo "Copying docker-compose file to server..."
 scp -o StrictHostKeyChecking=no -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/docker-compose.yml
 
-# Connect to the server and deploy
-echo "Connecting to server and deploying..."
-ssh -o StrictHostKeyChecking=no -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} << ENDSSH
+# Create a deployment script with credentials
+cat > deploy_remote.sh << 'EOFSCRIPT'
+#!/bin/bash
 set -e
+
+REPO="$1"
+DOCKER_USERNAME="$2"
+DOCKER_PASSWORD="$3"
 
 echo "Starting deployment on server..."
 echo "Repository: $REPO"
+
+# Login to Docker Hub if credentials are available
+if [ -n "$DOCKER_USERNAME" ] && [ -n "$DOCKER_PASSWORD" ]; then
+    echo "Logging in to Docker Hub with provided credentials..."
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+else
+    echo "No Docker Hub credentials provided. Attempting to pull public image..."
+fi
 
 # Stop existing container if running
 if [ \$(docker ps -q -f name=react-app) ]; then
@@ -89,20 +101,20 @@ if [ \$(docker ps -aq -f name=react-app) ]; then
     docker rm react-app || true
 fi
 
-# Pull the latest image directly (no authentication needed for public repos)
-echo "Pulling latest image: $REPO:latest"
-if ! docker pull $REPO:latest; then
+# Pull the latest image
+echo "Pulling latest image: \$REPO:latest"
+if ! docker pull \$REPO:latest; then
     echo "Failed to pull image. Image might be private or not exist."
     exit 1
 fi
 
-# Start new container using docker run (simpler than docker-compose)
+# Start new container using docker run
 echo "Starting new container..."
-docker run -d \\
-    --name react-app \\
-    -p 80:80 \\
-    --restart unless-stopped \\
-    $REPO:latest
+docker run -d \
+    --name react-app \
+    -p 80:80 \
+    --restart unless-stopped \
+    \$REPO:latest
 
 # Verify deployment
 echo "Verifying deployment..."
@@ -121,6 +133,16 @@ echo "Cleaning up old images..."
 docker image prune -f || true
 
 echo "🎉 Deployment completed successfully!"
-ENDSSH
+EOFSCRIPT
+
+# Copy deployment script to server
+echo "Copying deployment script to server..."
+scp -o StrictHostKeyChecking=no -i $SSH_KEY deploy_remote.sh ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/
+
+# Execute deployment on server with credentials
+echo "Executing deployment on server..."
+ssh -o StrictHostKeyChecking=no -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} "chmod +x deploy_remote.sh && ./deploy_remote.sh '$REPO' '$DOCKER_USERNAME' '$DOCKER_PASSWORD'"
+
+echo "✅ Automated deployment completed successfully!"
 
 echo "Deployment completed successfully!"
