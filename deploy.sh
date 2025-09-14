@@ -6,9 +6,9 @@ set -e
 # Configuration - change these as needed
 DEV_REPO="suryapkh/project3-dev"
 PROD_REPO="suryapkh/project3-prod"
-SSH_KEY="~/.ssh/your-aws-key.pem"  # Replace with your actual key filename
-SERVER_USER="ec2-user"
-SERVER_IP="YOUR_EC2_PUBLIC_IP"  # Replace with your actual AWS instance IP
+SSH_KEY="/home/surya/Project3/devops-key.pem"  # Replace with your actual key filename
+SERVER_USER="ubuntu"
+SERVER_IP="44.250.43.186"  # Replace with your actual AWS instance IP
 
 # Get the current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -45,11 +45,8 @@ scp -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SE
 # Connect to the server and deploy
 echo "Connecting to server and deploying..."
 ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} << 'ENDSSH'
-# Login to Docker Hub using environment variables (must be set securely)
-if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
-    echo "ERROR: DOCKER_USERNAME and DOCKER_PASSWORD environment variables must be set for Docker Hub login."
-    exit 1
-else
+# Login to Docker Hub if needed (you'll need to set these environment variables on the server)
+if [ ! -z "$DOCKER_USERNAME" ] && [ ! -z "$DOCKER_PASSWORD" ]; then
     echo "Logging in to Docker Hub..."
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 fi
