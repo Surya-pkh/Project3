@@ -7,6 +7,11 @@ pipeline {
         DOCKER_PASSWORD = "${DOCKER_HUB_CREDS_PSW}"
     }
     
+    triggers {
+        // Poll GitHub every 2 minutes for changes (backup trigger)
+        pollSCM('H/2 * * * *')
+    }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -35,18 +40,31 @@ pipeline {
         stage('Determine Branch') {
             steps {
                 script {
-                    env.GIT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "Current branch: ${env.GIT_BRANCH}"
+                    // Enhanced branch detection for better webhook support
+                    def detectedBranch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    detectedBranch = detectedBranch?.replaceAll('origin/', '')
+                    
+                    echo "🌟 Detected branch: ${detectedBranch}"
+                    echo "🌟 BRANCH_NAME env: ${env.BRANCH_NAME}"
+                    echo "🌟 GIT_BRANCH env: ${env.GIT_BRANCH}"
+                    echo "🌟 Build cause: ${currentBuild.getBuildCauses()}"
 
-                    if (env.GIT_BRANCH == 'dev' || env.GIT_BRANCH == 'origin/dev') {
-                        env.DOCKER_REPO = 'suryapkh/project3-dev'
-                    } else if (env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
-                        env.DOCKER_REPO = 'suryapkh/project3-prod'
-                    } else {
-                        error "Branch ${env.GIT_BRANCH} is not supported for deployment"
+                    switch(detectedBranch) {
+                        case 'dev':
+                            env.DOCKER_REPO = 'suryapkh/project3-dev'
+                            env.ENVIRONMENT = 'development'
+                            break
+                        case 'master':
+                        case 'main':
+                            env.DOCKER_REPO = 'suryapkh/project3-prod'
+                            env.ENVIRONMENT = 'production'
+                            break
+                        default:
+                            error "❌ Branch '${detectedBranch}' is not configured for deployment. Supported: dev, master, main"
                     }
 
-                    echo "Selected Docker repository: ${env.DOCKER_REPO}"
+                    echo "🐳 Selected Docker repository: ${env.DOCKER_REPO}"
+                    echo "🏗️ Target environment: ${env.ENVIRONMENT}"
                 }
             }
         }
@@ -95,10 +113,17 @@ pipeline {
     
     post {
         success {
-            echo 'Build, push, and deploy completed successfully!'
+            echo "🎉 SUCCESS: ${env.ENVIRONMENT} deployment completed successfully!"
+            echo "🌐 Branch: ${env.BRANCH_NAME ?: env.GIT_BRANCH}"
+            echo "🐳 Repository: ${env.DOCKER_REPO}"
         }
         failure {
-            echo 'Build, push, or deploy failed!'
+            echo "💥 FAILED: ${env.ENVIRONMENT} deployment failed!"
+            echo "🌐 Branch: ${env.BRANCH_NAME ?: env.GIT_BRANCH}"
+            echo "🔍 Check logs for details"
+        }
+        always {
+            echo "🏁 Pipeline finished for branch detection"
         }
     }
 }
