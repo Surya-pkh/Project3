@@ -52,17 +52,17 @@ pipeline {
         }
         
         stage('Deploy') {
-            when {
-                anyOf {
-                    branch 'dev'
-                    branch 'origin/dev'
-                    branch 'master'
-                    branch 'origin/master'
-                }
-            }
             steps {
                 script {
-                    sh './deploy.sh'
+                    // Only deploy for supported branches (dev and master/main)
+                    if (env.GIT_BRANCH == 'dev' || env.GIT_BRANCH == 'origin/dev' || 
+                        env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'origin/master' || 
+                        env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
+                        echo "Deploying from branch: ${env.GIT_BRANCH}"
+                        sh './deploy.sh'
+                    } else {
+                        echo "Skipping deployment for branch: ${env.GIT_BRANCH}"
+                    }
                 }
             }
         }
