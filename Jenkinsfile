@@ -53,7 +53,12 @@ pipeline {
         
         stage('Deploy') {
             when {
-                branch 'dev'
+                anyOf {
+                    branch 'dev'
+                    branch 'origin/dev'
+                    branch 'master'
+                    branch 'origin/master'
+                }
             }
             steps {
                 script {
