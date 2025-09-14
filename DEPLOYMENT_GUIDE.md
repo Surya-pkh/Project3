@@ -50,8 +50,8 @@ This document provides a comprehensive, step-by-step guide for deploying the Pro
      ```
 2. **Install Plugins:** Docker, Docker Pipeline, GitHub, Pipeline
 3. **Add Credentials:**
-   - Docker Hub: `suryapkh` / `suryapreethi69` (ID: `docker-hub-credentials`)
-   - GitHub token (if private repo)
+  - Docker Hub: Username/Password (ID: `docker-hub-credentials`) — do not hardcode in scripts
+  - GitHub token (if private repo)
 4. **Create Pipeline Job:**
    - Pipeline script from SCM, point to your repo and `Jenkinsfile`
 5. **Set up GitHub Webhook:**
@@ -84,7 +84,7 @@ This document provides a comprehensive, step-by-step guide for deploying the Pro
 - Stop and remove old container
 - Run new container
 
-**Sample deploy.sh:**
+**Sample deploy.sh (secure):**
 ```bash
 #!/bin/bash
 SERVER_USER=ubuntu
@@ -92,14 +92,22 @@ SERVER_IP=<EC2_PUBLIC_IP>
 SSH_KEY="/home/surya/Project3/devops-key.pem"
 REPO=$1 # pass 'suryapkh/project3-dev' or 'suryapkh/project3-prod'
 
-ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP << EOF
-  docker login -u suryapkh -p suryapreethi69
+# Ensure DOCKER_USERNAME and DOCKER_PASSWORD are set as environment variables!
+ssh -i $SSH_KEY $SERVER_USER@$SERVER_IP << 'EOF'
+  if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+    echo "ERROR: DOCKER_USERNAME and DOCKER_PASSWORD must be set."
+    exit 1
+  fi
+  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   docker pull $REPO:latest
   docker stop react-app || true
   docker rm react-app || true
   docker run -d --name react-app -p 80:80 $REPO:latest
 EOF
 ```
+
+**Jenkins Integration:**
+- Use Jenkins credentials to inject `DOCKER_USERNAME` and `DOCKER_PASSWORD` as environment variables when running `deploy.sh`.
 
 ---
 
@@ -136,4 +144,4 @@ terraform destroy
 ---
 
 ## 9. Summary
-This guide covers the full CI/CD pipeline, infrastructure as code, monitoring, and troubleshooting for Project3. All steps are automated and ready for production or client demonstration.
+This guide covers the full CI/CD pipeline, infrastructure as code, monitoring, and troubleshooting for Project3. All steps are automated and ready for production or client demonstration. No sensitive credentials are ever hardcoded; all secrets are managed securely via environment variables or Jenkins credentials.
