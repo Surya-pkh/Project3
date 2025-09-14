@@ -59,7 +59,14 @@ pipeline {
                         env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'origin/master' || 
                         env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
                         echo "Deploying from branch: ${env.GIT_BRANCH}"
-                        sh './deploy.sh'
+                        sh 'chmod +x deploy-jenkins.sh && ./deploy-jenkins.sh'
+                        
+                        // Archive deployment artifacts for manual deployment if needed
+                        archiveArtifacts artifacts: 'deployment-config.json,deploy-on-server.sh', 
+                                       allowEmptyArchive: false,
+                                       fingerprint: true
+                        
+                        echo "Deployment preparation completed. Check archived artifacts for manual deployment files."
                     } else {
                         echo "Skipping deployment for branch: ${env.GIT_BRANCH}"
                     }
