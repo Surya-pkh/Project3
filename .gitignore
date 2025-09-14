@@ -38,3 +38,4 @@ docker-compose.deploy.yml
 # AWS
 *.pem
 aws-key.pemterraform/.terraform/
+terraform/.terraform/
