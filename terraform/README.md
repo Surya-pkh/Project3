@@ -1,3 +1,25 @@
+## Jenkins Server Deployment
+
+Terraform will also provision a Jenkins server on a separate EC2 instance.
+
+### Access Jenkins
+
+1. Get the Jenkins EC2 public IP from the AWS Console or by running:
+   ```bash
+   terraform output
+   ```
+2. Open Jenkins in your browser:
+   ```
+   http://<JENKINS_EC2_PUBLIC_IP>:8080
+   ```
+3. Get the initial admin password:
+   ```bash
+   ssh -i /home/surya/Project3/devops-key.pem ubuntu@<JENKINS_EC2_PUBLIC_IP>
+   sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+   ```
+4. Complete the Jenkins setup wizard in your browser.
+
+Jenkins is pre-installed with Docker and ready for pipeline configuration.
 # Terraform AWS Deployment for React App
 
 ## Prerequisites
@@ -30,7 +52,14 @@
    terraform plan
    terraform apply
    ```
+
 3. Approve the plan. The EC2 instance will launch, auto-deploy the Docker app, and set up CloudWatch and SNS.
+
+## SSH Access
+To SSH into your EC2 instance, use:
+```bash
+ssh -i /home/surya/Project3/devops-key.pem ubuntu@<EC2_PUBLIC_IP>
+```
 
 ## CloudWatch & SNS
 - Logs from the Docker container are sent to CloudWatch Log Group `/aws/react-app`.
