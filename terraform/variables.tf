@@ -20,6 +20,11 @@ variable "my_ip_cidr" {
   description = "Your IP address in CIDR notation for SSH access (e.g., 1.2.3.4/32)"
 }
 
+variable "jenkins_ip_cidr" {
+  description = "Jenkins server IP address in CIDR notation for SSH access (e.g., 18.237.174.67/32)"
+  default     = "18.237.174.67/32"
+}
+
 variable "alert_email" {
   description = "Email address to receive SNS alerts"
 }
