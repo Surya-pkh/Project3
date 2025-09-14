@@ -10,18 +10,26 @@ SSH_KEY="/home/surya/Project3/devops-key.pem"  # Replace with your actual key fi
 SERVER_USER="ubuntu"
 SERVER_IP="44.250.43.186"  # Replace with your actual AWS instance IP
 
-# Get the current branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+# Get the current branch - try multiple methods to handle Jenkins environment
+if [ -n "$GIT_BRANCH" ]; then
+    # Use Jenkins environment variable if available
+    CURRENT_BRANCH="$GIT_BRANCH"
+else
+    # Fallback to git command
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+fi
+
+echo "Detected branch: $CURRENT_BRANCH"
 
 # Determine which repository to pull from based on branch
-if [ "$CURRENT_BRANCH" == "dev" ]; then
+if [ "$CURRENT_BRANCH" == "dev" ] || [ "$CURRENT_BRANCH" == "origin/dev" ]; then
     REPO=$DEV_REPO
-    echo "Deploying from development repository..."
-elif [ "$CURRENT_BRANCH" == "master" ] || [ "$CURRENT_BRANCH" == "main" ]; then
+    echo "Deploying from development repository: $DEV_REPO"
+elif [ "$CURRENT_BRANCH" == "master" ] || [ "$CURRENT_BRANCH" == "origin/master" ] || [ "$CURRENT_BRANCH" == "main" ] || [ "$CURRENT_BRANCH" == "origin/main" ]; then
     REPO=$PROD_REPO
-    echo "Deploying from production repository..."
+    echo "Deploying from production repository: $PROD_REPO"
 else
-    echo "Current branch is neither dev nor master/main. Cannot determine which repository to deploy from."
+    echo "Branch '$CURRENT_BRANCH' is not supported for deployment. Supported branches: dev, master, main (with or without origin/ prefix)"
     exit 1
 fi
 
