@@ -17,15 +17,15 @@ pipeline {
                 script {
                     env.GIT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
                     echo "Current branch: ${env.GIT_BRANCH}"
-                    
-                    if (env.GIT_BRANCH == 'dev') {
+
+                    if (env.GIT_BRANCH == 'dev' || env.GIT_BRANCH == 'origin/dev') {
                         env.DOCKER_REPO = 'suryapkh/project3-dev'
-                    } else if (env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'main') {
+                    } else if (env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
                         env.DOCKER_REPO = 'suryapkh/project3-prod'
                     } else {
                         error "Branch ${env.GIT_BRANCH} is not supported for deployment"
                     }
-                    
+
                     echo "Selected Docker repository: ${env.DOCKER_REPO}"
                 }
             }
