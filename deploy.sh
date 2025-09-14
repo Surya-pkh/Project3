@@ -45,8 +45,11 @@ scp -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SE
 # Connect to the server and deploy
 echo "Connecting to server and deploying..."
 ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} << 'ENDSSH'
-# Login to Docker Hub if needed (you'll need to set these environment variables on the server)
-if [ ! -z "$DOCKER_USERNAME" ] && [ ! -z "$DOCKER_PASSWORD" ]; then
+# Login to Docker Hub using environment variables (must be set securely)
+if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+    echo "ERROR: DOCKER_USERNAME and DOCKER_PASSWORD environment variables must be set for Docker Hub login."
+    exit 1
+else
     echo "Logging in to Docker Hub..."
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 fi
