@@ -1,0 +1,334 @@
+Started by GitHub push by Surya-pkh
+Lightweight checkout support not available, falling back to full checkout.
+Checking out git https://github.com/Surya-pkh/Project3.git into /var/lib/jenkins/workspace/ReactApp-CI-CD@script/0f23c5681b65c58b2156864d2a8ed90552476162aa97c52de8801d19e8092ef2 to read Jenkinsfile
+The recommended git tool is: NONE
+using credential github-credentials
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/ReactApp-CI-CD@script/0f23c5681b65c58b2156864d2a8ed90552476162aa97c52de8801d19e8092ef2/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Surya-pkh/Project3.git # timeout=10
+Fetching upstream changes from https://github.com/Surya-pkh/Project3.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.25.1'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/Surya-pkh/Project3.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Seen branch in repository origin/dev
+Seen branch in repository origin/master
+Seen 2 remote branches
+ > git show-ref --tags -d # timeout=10
+Checking out Revision 2e667376015596543abbc03c9511605ccf9f490a (origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2e667376015596543abbc03c9511605ccf9f490a # timeout=10
+Commit message: "Fix syntax error in deploy_remote.sh: Use printf instead of here document to avoid escaping issues"
+ > git rev-list --no-walk a26a4573ea3b0715fd854219974f760ced84db39 # timeout=10
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/ReactApp-CI-CD
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: NONE
+using credential github-credentials
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/ReactApp-CI-CD/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Surya-pkh/Project3.git # timeout=10
+Fetching upstream changes from https://github.com/Surya-pkh/Project3.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.25.1'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/Surya-pkh/Project3.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Seen branch in repository origin/dev
+Seen branch in repository origin/master
+Seen 2 remote branches
+ > git show-ref --tags -d # timeout=10
+Checking out Revision 2e667376015596543abbc03c9511605ccf9f490a (origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2e667376015596543abbc03c9511605ccf9f490a # timeout=10
+Commit message: "Fix syntax error in deploy_remote.sh: Use printf instead of here document to avoid escaping issues"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of $DOCKER_HUB_CREDS or $DOCKER_HUB_CREDS_PSW
+[Pipeline] {
+[Pipeline] withEnv
+Warning: A secret was passed to "withEnv" using Groovy String interpolation, which is insecure.
+		 Affected argument(s) used the following variable(s): [DOCKER_HUB_CREDS_PSW]
+		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+The recommended git tool is: NONE
+using credential github-credentials
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/ReactApp-CI-CD/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Surya-pkh/Project3.git # timeout=10
+Fetching upstream changes from https://github.com/Surya-pkh/Project3.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.25.1'
+using GIT_ASKPASS to set credentials 
+ > git fetch --tags --force --progress -- https://github.com/Surya-pkh/Project3.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Seen branch in repository origin/dev
+Seen branch in repository origin/master
+Seen 2 remote branches
+ > git show-ref --tags -d # timeout=10
+Checking out Revision 2e667376015596543abbc03c9511605ccf9f490a (origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2e667376015596543abbc03c9511605ccf9f490a # timeout=10
+Commit message: "Fix syntax error in deploy_remote.sh: Use printf instead of here document to avoid escaping issues"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Setup SSH Key)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ [ -f /var/lib/jenkins/devops-key.pem ]
++ cp /var/lib/jenkins/devops-key.pem ./devops-key.pem
++ chmod 600 ./devops-key.pem
++ echo ✅ SSH key copied to workspace
+✅ SSH key copied to workspace
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Determine Branch)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ git rev-parse --abbrev-ref HEAD
+[Pipeline] echo
+Current branch: origin/master
+[Pipeline] echo
+Selected Docker repository: suryapkh/project3-prod
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build and Push)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+Using build.sh script for automated build and push...
+[Pipeline] sh
++ chmod +x build.sh
+[Pipeline] sh
++ ./build.sh
+Building from branch: origin/master
+Building Docker image...
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  2.695MB
+Step 1/6 : FROM nginx:alpine
+ ---> 4a86014ec699
+Step 2/6 : RUN rm -rf /usr/share/nginx/html/*
+ ---> Using cache
+ ---> d80f7a360583
+Step 3/6 : COPY build/ /usr/share/nginx/html/
+ ---> Using cache
+ ---> df432290c586
+Step 4/6 : COPY nginx.conf /etc/nginx/conf.d/default.conf
+ ---> Using cache
+ ---> 7e4e1e1ec3fb
+Step 5/6 : EXPOSE 80
+ ---> Using cache
+ ---> 24c46a637666
+Step 6/6 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Using cache
+ ---> d424f60400a3
+Successfully built d424f60400a3
+Successfully tagged suryapkh/project3:20250914-104259
+Logging in to Docker Hub...
+WARNING! Your password will be stored unencrypted in /var/lib/jenkins/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+Tagging image for production repository...
+Pushing to production repository...
+The push refers to repository [docker.io/suryapkh/project3-prod]
+d4e13cc41b91: Preparing
+11b83b343763: Preparing
+d1b24aa4f5d5: Preparing
+f9985d3fc94d: Preparing
+d208138be39d: Preparing
+a2b76470e8f1: Preparing
+917b2c97271e: Preparing
+16ca725632e5: Preparing
+7978a9c91f72: Preparing
+b6ff0212304e: Preparing
+418dccb7d85a: Preparing
+a2b76470e8f1: Waiting
+917b2c97271e: Waiting
+16ca725632e5: Waiting
+7978a9c91f72: Waiting
+b6ff0212304e: Waiting
+418dccb7d85a: Waiting
+f9985d3fc94d: Layer already exists
+d208138be39d: Layer already exists
+d4e13cc41b91: Layer already exists
+d1b24aa4f5d5: Layer already exists
+11b83b343763: Layer already exists
+917b2c97271e: Layer already exists
+a2b76470e8f1: Layer already exists
+7978a9c91f72: Layer already exists
+16ca725632e5: Layer already exists
+b6ff0212304e: Layer already exists
+418dccb7d85a: Layer already exists
+20250914-104259: digest: sha256:b9f0cb376036adb12538d5ba3496d477bff28b9ce4992637efac7521ab26b778 size: 2613
+The push refers to repository [docker.io/suryapkh/project3-prod]
+d4e13cc41b91: Preparing
+11b83b343763: Preparing
+d1b24aa4f5d5: Preparing
+f9985d3fc94d: Preparing
+d208138be39d: Preparing
+a2b76470e8f1: Preparing
+917b2c97271e: Preparing
+16ca725632e5: Preparing
+7978a9c91f72: Preparing
+b6ff0212304e: Preparing
+418dccb7d85a: Preparing
+a2b76470e8f1: Waiting
+917b2c97271e: Waiting
+16ca725632e5: Waiting
+7978a9c91f72: Waiting
+b6ff0212304e: Waiting
+418dccb7d85a: Waiting
+f9985d3fc94d: Layer already exists
+d208138be39d: Layer already exists
+11b83b343763: Layer already exists
+d4e13cc41b91: Layer already exists
+d1b24aa4f5d5: Layer already exists
+a2b76470e8f1: Layer already exists
+917b2c97271e: Layer already exists
+b6ff0212304e: Layer already exists
+16ca725632e5: Layer already exists
+7978a9c91f72: Layer already exists
+418dccb7d85a: Layer already exists
+latest: digest: sha256:b9f0cb376036adb12538d5ba3496d477bff28b9ce4992637efac7521ab26b778 size: 2613
+Image successfully pushed to production repository: suryapkh/project3-prod
+Build process completed successfully!
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy to EC2)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+Deploying from branch: origin/master using deploy.sh
+[Pipeline] sh
++ chmod +x deploy.sh
+[Pipeline] sh
++ ./deploy.sh
+Detected branch: origin/master
+Deploying from production repository: suryapkh/project3-prod
+Copying docker-compose file to server...
+Copying deployment script to server...
+Executing deployment on server...
+Starting deployment on server...
+Repository: suryapkh/project3-prod
+Logging in to Docker Hub with provided credentials...
+WARNING! Your password will be stored unencrypted in /home/ubuntu/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+Pulling latest image: suryapkh/project3-prod:latest
+latest: Pulling from suryapkh/project3-prod
+9824c27679d3: Already exists
+6bc572a340ec: Already exists
+403e3f251637: Already exists
+9adfbae99cb7: Already exists
+7a8a46741e18: Already exists
+c9ebe2ff2d2c: Already exists
+a992fbc61ecc: Already exists
+cb1ff4086f82: Already exists
+a1843d839846: Pulling fs layer
+4f5499ba6552: Pulling fs layer
+bc5a92907b08: Pulling fs layer
+a1843d839846: Verifying Checksum
+a1843d839846: Download complete
+a1843d839846: Pull complete
+bc5a92907b08: Verifying Checksum
+bc5a92907b08: Download complete
+4f5499ba6552: Verifying Checksum
+4f5499ba6552: Download complete
+4f5499ba6552: Pull complete
+bc5a92907b08: Pull complete
+Digest: sha256:b9f0cb376036adb12538d5ba3496d477bff28b9ce4992637efac7521ab26b778
+Status: Downloaded newer image for suryapkh/project3-prod:latest
+docker.io/suryapkh/project3-prod:latest
+Starting new container...
+bcebbf5978bc0c1860f6b8e512b6528752f9f5f823d2ece681e7db8da536c31a
+Verifying deployment...
+✅ Container is running successfully!
+CONTAINER ID   IMAGE                           COMMAND                  CREATED         STATUS         PORTS                               NAMES
+bcebbf5978bc   suryapkh/project3-prod:latest   "/docker-entrypoint.…"   4 seconds ago   Up 3 seconds   0.0.0.0:80->80/tcp, :::80->80/tcp   react-app
+Cleaning up old images...
+Deleted Images:
+deleted: sha256:f6f6a8e3be50126eccdcfe3068907eac86923e10dd6e653d770be44fcbbef7b7
+deleted: sha256:f9e23570f16130c492342cad76b3f00cb9c59b906fac5219ca799b63d1227d52
+deleted: sha256:5429d6a9a28d69a98ac0d7c64fa66d9bf6308f74d5bda37c74d21f8565111f05
+deleted: sha256:8625b93c9effb0a5893635a821573263b59da1da8341328a755769334f6d6ac9
+
+Total reclaimed space: 2.604MB
+🎉 Deployment completed successfully!
+✅ Automated deployment completed successfully!
+Deployment completed successfully!
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Clean Up)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker images
++ awk {print $3}
++ xargs -r docker rmi
++ date +%Y%m%d
++ grep 20250914
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
+Error response from daemon: conflict: unable to delete d424f60400a3 (must be forced) - image is referenced in multiple repositories
++ true
++ docker image prune -f
+Total reclaimed space: 0B
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Build, push, and deploy completed successfully!
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
