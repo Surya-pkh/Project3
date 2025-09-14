@@ -69,14 +69,13 @@ EOF
 echo "Copying docker-compose file to server..."
 scp -o StrictHostKeyChecking=no -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/docker-compose.yml
 
-# Create a deployment script with credentials
-cat > deploy_remote.sh << 'EOFSCRIPT'
-#!/bin/bash
+# Create a deployment script with credentials using printf to avoid escaping issues
+printf '#!/bin/bash
 set -e
 
-REPO="$1"
-DOCKER_USERNAME="$2"
-DOCKER_PASSWORD="$3"
+REPO="%s"
+DOCKER_USERNAME="%s" 
+DOCKER_PASSWORD="%s"
 
 echo "Starting deployment on server..."
 echo "Repository: $REPO"
@@ -90,36 +89,36 @@ else
 fi
 
 # Stop existing container if running
-if [ \$(docker ps -q -f name=react-app) ]; then
+if [ $(docker ps -q -f name=react-app) ]; then
     echo "Stopping existing container..."
     docker stop react-app || true
 fi
 
 # Remove existing container if exists
-if [ \$(docker ps -aq -f name=react-app) ]; then
+if [ $(docker ps -aq -f name=react-app) ]; then
     echo "Removing existing container..."
     docker rm react-app || true
 fi
 
 # Pull the latest image
-echo "Pulling latest image: \$REPO:latest"
-if ! docker pull \$REPO:latest; then
+echo "Pulling latest image: $REPO:latest"
+if ! docker pull $REPO:latest; then
     echo "Failed to pull image. Image might be private or not exist."
     exit 1
 fi
 
 # Start new container using docker run
 echo "Starting new container..."
-docker run -d \
-    --name react-app \
-    -p 80:80 \
-    --restart unless-stopped \
-    \$REPO:latest
+docker run -d \\
+    --name react-app \\
+    -p 80:80 \\
+    --restart unless-stopped \\
+    $REPO:latest
 
 # Verify deployment
 echo "Verifying deployment..."
 sleep 3
-if [ \$(docker ps -q -f name=react-app) ]; then
+if [ $(docker ps -q -f name=react-app) ]; then
     echo "✅ Container is running successfully!"
     docker ps -f name=react-app
 else
@@ -133,7 +132,7 @@ echo "Cleaning up old images..."
 docker image prune -f || true
 
 echo "🎉 Deployment completed successfully!"
-EOFSCRIPT
+' "$REPO" "$DOCKER_USERNAME" "$DOCKER_PASSWORD" > deploy_remote.sh
 
 # Copy deployment script to server
 echo "Copying deployment script to server..."
