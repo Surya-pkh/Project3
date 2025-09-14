@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Deployment script for React application using Docker and Docker Compose
 # Exit immediately if a command exits with a non-zero status
 set -e
 
