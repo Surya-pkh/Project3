@@ -14,6 +14,24 @@ pipeline {
             }
         }
         
+        stage('Setup SSH Key') {
+            steps {
+                script {
+                    // Copy SSH key from Jenkins home to workspace
+                    sh '''
+                        if [ -f "/var/lib/jenkins/devops-key.pem" ]; then
+                            cp /var/lib/jenkins/devops-key.pem ./devops-key.pem
+                            chmod 600 ./devops-key.pem
+                            echo "✅ SSH key copied to workspace"
+                        else
+                            echo "❌ SSH key not found at /var/lib/jenkins/devops-key.pem"
+                            exit 1
+                        fi
+                    '''
+                }
+            }
+        }
+        
         stage('Determine Branch') {
             steps {
                 script {
