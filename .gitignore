@@ -31,11 +31,18 @@ yarn-error.log*
 
 # Docker deployment
 docker-compose.deploy.yml
+deploy_remote.sh
+deployment-config.json
+*.tar
+
+# Temporary deployment files
+deploy-offline.sh
+deploy-on-server.sh
 
 # Environment variables
 .env
 
 # AWS
 *.pem
-aws-key.pemterraform/.terraform/
 terraform/.terraform/
+terraform/.terraform.lock.hcl
