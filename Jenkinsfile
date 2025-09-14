@@ -3,6 +3,8 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        DOCKER_USERNAME = "${DOCKER_HUB_CREDS_USR}"
+        DOCKER_PASSWORD = "${DOCKER_HUB_CREDS_PSW}"
     }
     
     stages {
@@ -31,42 +33,26 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build and Push') {
             steps {
                 script {
-                    env.BUILD_TAG = sh(script: 'date +%Y%m%d-%H%M%S', returnStdout: true).trim()
-                    sh "docker build -t ${env.DOCKER_REPO}:${env.BUILD_TAG} ."
-                    sh "docker tag ${env.DOCKER_REPO}:${env.BUILD_TAG} ${env.DOCKER_REPO}:latest"
+                    echo "Using build.sh script for automated build and push..."
+                    sh 'chmod +x build.sh'
+                    sh './build.sh'
                 }
             }
         }
         
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    sh 'echo $DOCKER_HUB_CREDS_PSW | docker login -u $DOCKER_HUB_CREDS_USR --password-stdin'
-                    sh "docker push ${env.DOCKER_REPO}:${env.BUILD_TAG}"
-                    sh "docker push ${env.DOCKER_REPO}:latest"
-                }
-            }
-        }
-        
-        stage('Deploy') {
+        stage('Deploy to EC2') {
             steps {
                 script {
                     // Only deploy for supported branches (dev and master/main)
                     if (env.GIT_BRANCH == 'dev' || env.GIT_BRANCH == 'origin/dev' || 
                         env.GIT_BRANCH == 'master' || env.GIT_BRANCH == 'origin/master' || 
                         env.GIT_BRANCH == 'main' || env.GIT_BRANCH == 'origin/main') {
-                        echo "Deploying from branch: ${env.GIT_BRANCH}"
-                        sh 'chmod +x deploy-jenkins.sh && ./deploy-jenkins.sh'
-                        
-                        // Archive deployment artifacts for manual deployment if needed
-                        archiveArtifacts artifacts: 'deployment-config.json,deploy-on-server.sh', 
-                                       allowEmptyArchive: false,
-                                       fingerprint: true
-                        
-                        echo "Deployment preparation completed. Check archived artifacts for manual deployment files."
+                        echo "Deploying from branch: ${env.GIT_BRANCH} using deploy.sh"
+                        sh 'chmod +x deploy.sh'
+                        sh './deploy.sh'
                     } else {
                         echo "Skipping deployment for branch: ${env.GIT_BRANCH}"
                     }
@@ -76,9 +62,15 @@ pipeline {
         
         stage('Clean Up') {
             steps {
-                sh "docker rmi ${env.DOCKER_REPO}:${env.BUILD_TAG}"
-                sh "docker rmi ${env.DOCKER_REPO}:latest"
-                sh 'docker image prune -f'
+                script {
+                    // Clean up Docker images - get them from build.sh output or use pattern matching
+                    sh '''
+                        # Clean up any images from this build
+                        docker images | grep "$(date +%Y%m%d)" | awk '{print $3}' | xargs -r docker rmi || true
+                        # Clean up dangling images
+                        docker image prune -f || true
+                    '''
+                }
             }
         }
     }

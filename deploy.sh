@@ -6,7 +6,15 @@ set -e
 # Configuration - change these as needed
 DEV_REPO="suryapkh/project3-dev"
 PROD_REPO="suryapkh/project3-prod"
-SSH_KEY="/home/surya/Project3/devops-key.pem"  # Replace with your actual key filename
+# SSH key path - different for local vs Jenkins environment
+if [ -f "/home/surya/Project3/devops-key.pem" ]; then
+    SSH_KEY="/home/surya/Project3/devops-key.pem"  # Local environment
+elif [ -f "$HOME/.ssh/devops-key.pem" ]; then
+    SSH_KEY="$HOME/.ssh/devops-key.pem"  # Jenkins environment
+else
+    echo "Error: SSH key not found in expected locations"
+    exit 1
+fi
 SERVER_USER="ubuntu"
 SERVER_IP="44.250.43.186"  # Replace with your actual AWS instance IP
 
@@ -48,29 +56,60 @@ EOF
 
 # Copy the Docker Compose file to the server
 echo "Copying docker-compose file to server..."
-scp -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/docker-compose.yml
+scp -o StrictHostKeyChecking=no -i $SSH_KEY docker-compose.deploy.yml ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/docker-compose.yml
 
 # Connect to the server and deploy
 echo "Connecting to server and deploying..."
-ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} << 'ENDSSH'
-# Login to Docker Hub if needed (you'll need to set these environment variables on the server)
-if [ ! -z "$DOCKER_USERNAME" ] && [ ! -z "$DOCKER_PASSWORD" ]; then
-    echo "Logging in to Docker Hub..."
-    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+ssh -o StrictHostKeyChecking=no -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} << ENDSSH
+set -e
+
+echo "Starting deployment on server..."
+echo "Repository: $REPO"
+
+# Stop existing container if running
+if [ \$(docker ps -q -f name=react-app) ]; then
+    echo "Stopping existing container..."
+    docker stop react-app || true
 fi
 
-# Pull the latest image and deploy
-echo "Pulling the latest image..."
-docker-compose pull
+# Remove existing container if exists
+if [ \$(docker ps -aq -f name=react-app) ]; then
+    echo "Removing existing container..."
+    docker rm react-app || true
+fi
 
-echo "Stopping and removing existing containers..."
-docker-compose down
+# Pull the latest image directly (no authentication needed for public repos)
+echo "Pulling latest image: $REPO:latest"
+if ! docker pull $REPO:latest; then
+    echo "Failed to pull image. Image might be private or not exist."
+    exit 1
+fi
 
-echo "Starting new containers..."
-docker-compose up -d
+# Start new container using docker run (simpler than docker-compose)
+echo "Starting new container..."
+docker run -d \\
+    --name react-app \\
+    -p 80:80 \\
+    --restart unless-stopped \\
+    $REPO:latest
 
+# Verify deployment
+echo "Verifying deployment..."
+sleep 3
+if [ \$(docker ps -q -f name=react-app) ]; then
+    echo "✅ Container is running successfully!"
+    docker ps -f name=react-app
+else
+    echo "❌ Container failed to start!"
+    docker logs react-app || true
+    exit 1
+fi
+
+# Clean up old images
 echo "Cleaning up old images..."
-docker image prune -f
+docker image prune -f || true
+
+echo "🎉 Deployment completed successfully!"
 ENDSSH
 
 echo "Deployment completed successfully!"
