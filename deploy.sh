@@ -10,9 +10,20 @@ PROD_REPO="suryapkh/project3-prod"
 if [ -f "/home/surya/Project3/devops-key.pem" ]; then
     SSH_KEY="/home/surya/Project3/devops-key.pem"  # Local environment
 elif [ -f "$HOME/.ssh/devops-key.pem" ]; then
-    SSH_KEY="$HOME/.ssh/devops-key.pem"  # Jenkins environment
+    SSH_KEY="$HOME/.ssh/devops-key.pem"  # Jenkins home directory
+elif [ -f "/var/lib/jenkins/devops-key.pem" ]; then
+    SSH_KEY="/var/lib/jenkins/devops-key.pem"  # Jenkins workspace
+elif [ -f "./devops-key.pem" ]; then
+    SSH_KEY="./devops-key.pem"  # Current directory
+elif [ -f "./devops-key-jenkins.pem" ]; then
+    SSH_KEY="./devops-key-jenkins.pem"  # Jenkins workspace key
 else
-    echo "Error: SSH key not found in expected locations"
+    echo "Error: SSH key not found in expected locations:"
+    echo "  - /home/surya/Project3/devops-key.pem"
+    echo "  - $HOME/.ssh/devops-key.pem"
+    echo "  - /var/lib/jenkins/devops-key.pem" 
+    echo "  - ./devops-key.pem"
+    echo "  - ./devops-key-jenkins.pem"
     exit 1
 fi
 SERVER_USER="ubuntu"
