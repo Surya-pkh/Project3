@@ -10,8 +10,7 @@
 # Don't ignore build directory as we're deploying a pre-built app
 # /build
 
-# Misc
-.DS_Store
+# Environment variables
 .env
 .env.local
 .env.development.local
@@ -22,31 +21,59 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
-# IDE
+# IDE & Editor files
 /.idea
 /.vscode
 *.swp
 *.swo
+*.tmp
+*~
 
-# Docker deployment
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary & Build artifacts
+*.tmp
+*.temp
+*.cache
+/temp/
+/tmp/
+
+# Docker deployment (keep essential files, ignore temp)
 docker-compose.deploy.yml
 docker-compose.monitoring.yml
 deploy_remote.sh
 deployment-config.json
 *.tar
-
-# Temporary deployment files
 deploy-offline.sh
 deploy-on-server.sh
 
-# Monitoring (if using Prometheus in future)
-prometheus/
-
-# Environment variables
-.env
-
-# AWS
-*.pem
+# Terraform
 terraform/.terraform/
 terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfplan
+
+# AWS Security
+*.pem
+
+# Monitoring (unused)
+prometheus/
+
+# Test files
+test-*.txt
+*-test.*
+/tests/temp/
+
+# Documentation temp files
+docs/temp/
+*.draft.md
