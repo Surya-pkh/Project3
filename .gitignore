@@ -31,6 +31,7 @@ yarn-error.log*
 
 # Docker deployment
 docker-compose.deploy.yml
+docker-compose.monitoring.yml
 deploy_remote.sh
 deployment-config.json
 *.tar
@@ -38,6 +39,9 @@ deployment-config.json
 # Temporary deployment files
 deploy-offline.sh
 deploy-on-server.sh
+
+# Monitoring (if using Prometheus in future)
+prometheus/
 
 # Environment variables
 .env
